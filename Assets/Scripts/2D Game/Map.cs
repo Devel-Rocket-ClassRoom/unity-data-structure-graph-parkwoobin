@@ -1,12 +1,15 @@
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
-public enum TitleTypes
+public enum TileTypes
 {
     Empty = -1,
     Grass = 15,
-    Wall,
+    Tree,
     Hills,
     Mountains,
+    Towns,
     Castle,
     Monsters,
 }
@@ -15,18 +18,24 @@ public class Map
     public int rows = 0;
     public int cols = 0;
 
-    public Title[] titles;
+    public Tile[] tiles;
+
+    public Tile[] CoastTiles => tiles.Where(t => t.autoTileId >= 0 && t.autoTileId < (int)TileTypes.Grass).ToArray();
+    public Tile[] LandTiles => tiles.Where(t => t.autoTileId == (int)TileTypes.Grass).ToArray();
+
+    public Tile startTile;
+    public Tile castleTile;
 
     public void Init(int rows, int cols)
     {
         this.rows = rows;
         this.cols = cols;
 
-        titles = new Title[rows * cols];
-        for (int i = 0; i < titles.Length; i++)
+        tiles = new Tile[rows * cols];
+        for (int i = 0; i < tiles.Length; i++)
         {
-            titles[i] = new Title();
-            titles[i].id = i;
+            tiles[i] = new Tile();
+            tiles[i].id = i;
         }
 
         for (int r = 0; r < rows; r++)
@@ -34,29 +43,85 @@ public class Map
             for (int c = 0; c < cols; c++)
             {
                 int index = r * cols + c;
-                var adjacents = titles[index].adjacents;
+                var adjacents = tiles[index].adjacents;
                 if ((r - 1) >= 0)
                 {
-                    adjacents[(int)Sides.Top] = titles[index - cols];  // up
+                    adjacents[(int)Sides.Top] = tiles[index - cols];  // up
                 }
                 if ((c + 1) < cols)
                 {
-                    adjacents[(int)Sides.Right] = titles[index + 1];    // right
+                    adjacents[(int)Sides.Right] = tiles[index + 1];    // right
                 }
                 if ((c - 1) >= 0)
                 {
-                    adjacents[(int)Sides.Left] = titles[index - 1];    // left
+                    adjacents[(int)Sides.Left] = tiles[index - 1];    // left
                 }
                 if ((r + 1) < rows)
                 {
-                    adjacents[(int)Sides.Bottom] = titles[index + cols];  // bottom
+                    adjacents[(int)Sides.Bottom] = tiles[index + cols];  // bottom
                 }
             }
         }
 
-        for (int i = 0; i < titles.Length; i++)
+        for (int i = 0; i < tiles.Length; i++)
         {
-            titles[i].UpdateAutoTileId();
+            tiles[i].UpdateAutoTileId();
         }
+    }
+
+    public void ShuffleTiles(Tile[] tiles)
+    {
+        for (int i = tiles.Length - 1; i > 0; i--)
+        {
+            int rand = Random.Range(0, i + 1);
+            (tiles[rand], tiles[i]) = (tiles[i], tiles[rand]);
+        }
+    }
+
+    public void DecorateTiles(Tile[] tiles, float percent, TileTypes tileType)
+    {
+        ShuffleTiles(tiles);
+        int total = Mathf.FloorToInt(tiles.Length * percent);
+        for (int i = 0; i < total; i++)
+        {
+            if (tileType == TileTypes.Empty)
+            {
+                tiles[i].ClearAdjacents();
+            }
+            tiles[i].autoTileId = (int)tileType;
+        }
+    }
+
+    public bool CreateIsland(
+        float erodePercent,
+        int erodeIterations,
+        float lakePercent,
+        float treePercent,
+        float hillPercent,
+        float mountainPercent,
+        float townPercent,
+        float monsterPercent
+    )
+    {
+        for (int i = 0; i < erodeIterations; i++)
+        {
+            DecorateTiles(CoastTiles, erodePercent, TileTypes.Empty);
+        }
+
+        DecorateTiles(LandTiles, lakePercent, TileTypes.Empty);
+        DecorateTiles(LandTiles, treePercent, TileTypes.Tree);
+        DecorateTiles(LandTiles, hillPercent, TileTypes.Hills);
+        DecorateTiles(LandTiles, mountainPercent, TileTypes.Mountains);
+        DecorateTiles(LandTiles, townPercent, TileTypes.Towns);
+        DecorateTiles(LandTiles, monsterPercent, TileTypes.Monsters);
+
+        var towns = tiles.Where(t => t.autoTileId == (int)TileTypes.Towns).ToArray();
+        ShuffleTiles(towns);
+
+        castleTile = towns[0];
+        startTile = towns[1];
+        castleTile.autoTileId = (int)TileTypes.Castle;
+
+        return true;
     }
 }
