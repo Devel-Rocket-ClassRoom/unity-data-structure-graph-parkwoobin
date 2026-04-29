@@ -35,10 +35,10 @@ public class TileSearch : MonoBehaviour
             return;
         }
 
-        if (player.isMoving)    // 이동 중 재클릭으로 경로 시작 타일이 꼬이는 문제를 방지
-        {
-            return;
-        }
+        // if (player.isMoving)    // 이동 중 재클릭으로 경로 시작 타일이 꼬이는 문제를 방지
+        // {
+        //     return;
+        // }
 
         int targetTileId = stage.ScreenPosToTileId(Input.mousePosition);    // 클릭한 위치의 타일 ID 가져오기
         Tile targetTile = stage.Map.tiles[targetTileId];    // 클릭한 위치의 타일 가져오기
