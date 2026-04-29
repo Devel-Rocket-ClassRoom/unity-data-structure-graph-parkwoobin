@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2821431249186470094}
   - component: {fileID: 6363379071849112708}
   - component: {fileID: 460477953579650568}
+  - component: {fileID: 6923846211827329611}
   m_Layer: 0
   m_Name: knight
   m_TagString: Untagged
@@ -127,3 +128,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c96700022a5e562478955e9b2405c438, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  currentTileId: -1
+  moveSpeed: 50
+  isMoving: 0
+--- !u!114 &6923846211827329611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2742993652015789912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bf9be721ac7a974cb69429fad5876d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileSearch

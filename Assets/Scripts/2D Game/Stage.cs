@@ -39,7 +39,6 @@ public class Stage : MonoBehaviour
     public PlayerMovement playerPrefab;
     private PlayerMovement player;
 
-    public int FowRadius = 3;   // 시야 반경
     public Sprite[] fowSprites; // 시야에 따른 타일 스프라이트 배열
 
 
@@ -94,8 +93,7 @@ public class Stage : MonoBehaviour
             Destroy(player.gameObject);
         }
         player = Instantiate(playerPrefab);
-        player.MoveTo(map.startTile.id);
-        UpdateVisibility(map.startTile.id);
+        player.WarpTo(map.startTile.id);
     }
 
     private void CreateGrid()
@@ -138,31 +136,66 @@ public class Stage : MonoBehaviour
         var tile = map.tiles[tileId];
         var tileGo = tileObjs[tileId];
         var ren = tileGo.GetComponent<SpriteRenderer>();
-        if (tile.autoTileId != (int)TileTypes.Empty)
+        if (tile.isVisited)
         {
-            if (tile.isVisited)
+            if (tile.autoTileId != (int)TileTypes.Empty)
             {
                 ren.sprite = islandSprites[tile.autoTileId];
-
-            }
-            else
-            {
-                tile.UpdateFowTileId();
-                if (fowSprites != null && tile.fowTileId >= 0 && tile.fowTileId < fowSprites.Length)
-                {
-                    ren.sprite = fowSprites[tile.fowTileId];
-                }
-            }
-        }
-        else
-        {
-            if (fowSprites != null && fowSprites.Length > 0)
-            {
-                ren.sprite = fowSprites[15];
             }
             else
             {
                 ren.sprite = null;
+            }
+        }
+        else
+        {
+            ren.sprite = fowSprites[tile.fowTileId];
+        }
+    }
+
+    public int visitRadius = 1;
+    public void OnTileVisited(int tileId)
+    {
+        OnTileVisited(map.tiles[tileId]);
+    }
+
+    public void OnTileVisited(Tile tile)
+    {
+        int centerX = tile.id % mapWidth;
+        int centerY = tile.id / mapWidth;
+
+        for (int i = -visitRadius; i <= visitRadius; i++)
+        {
+            for (int j = -visitRadius; j <= visitRadius; j++)
+            {
+                int x = centerX + j;
+                int y = centerY + i;
+                if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
+                {
+                    continue;
+                }
+                int id = y * mapWidth + x;
+                map.tiles[id].isVisited = true;
+                DecorateTile(id);
+            }
+        }
+        var radius = visitRadius + 1;
+        for (int i = -radius; i <= radius; i++)
+        {
+            for (int j = -radius; j <= radius; j++)
+            {
+                if (i == -radius || i == radius || j == -radius || j == radius)
+                {
+                    int x = centerX + j;
+                    int y = centerY + i;
+                    if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
+                    {
+                        continue;
+                    }
+                    int id = y * mapWidth + x;
+                    map.tiles[id].UpdateFowTileId();
+                    DecorateTile(id);
+                }
             }
         }
     }
@@ -200,38 +233,5 @@ public class Stage : MonoBehaviour
         int x = tileId % mapWidth;
 
         return GetTilePos(y, x);
-    }
-
-    public void UpdateVisibility(int centertileId)
-    {
-        if (map == null || map.tiles == null || centertileId < 0 || centertileId >= map.tiles.Length)
-        {
-            return;
-        }
-
-        int centerY = centertileId / mapWidth;
-        int centerX = centertileId % mapWidth;
-        int visibleRadius = Mathf.Max(0, FowRadius / 2);
-        int refreshRadius = visibleRadius + 1;
-
-
-
-        for (int y = Mathf.Max(0, centerY - visibleRadius); y <= Mathf.Min(mapHeight - 1, centerY + visibleRadius); y++)
-        {
-            for (int x = Mathf.Max(0, centerX - visibleRadius); x <= Mathf.Min(mapWidth - 1, centerX + visibleRadius); x++)
-            {
-                int tileId = y * mapWidth + x;
-                map.tiles[tileId].isVisited = true;
-            }
-        }
-
-        for (int y = Mathf.Max(0, centerY - refreshRadius); y <= Mathf.Min(mapHeight - 1, centerY + refreshRadius); y++)
-        {
-            for (int x = Mathf.Max(0, centerX - refreshRadius); x <= Mathf.Min(mapWidth - 1, centerX + refreshRadius); x++)
-            {
-                int tileId = y * mapWidth + x;
-                DecorateTile(tileId);
-            }
-        }
     }
 }

@@ -336,7 +336,6 @@ MonoBehaviour:
   - {fileID: 21300040, guid: 6dda2095192964815b349ac505a5e664, type: 3}
   - {fileID: 21300042, guid: 6dda2095192964815b349ac505a5e664, type: 3}
   playerPrefab: {fileID: 460477953579650568, guid: 2094c4f830491ee4abeede839a7326e5, type: 3}
-  FowRadius: 3
   fowSprites:
   - {fileID: 21300000, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
   - {fileID: 21300002, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
@@ -354,6 +353,7 @@ MonoBehaviour:
   - {fileID: 21300026, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
   - {fileID: 21300028, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
   - {fileID: 21300030, guid: dfa5f63634ba24c06a7c899467e4f9f3, type: 3}
+  visitRadius: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

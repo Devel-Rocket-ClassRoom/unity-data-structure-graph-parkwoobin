@@ -18,14 +18,46 @@ public class Tile
     public int fowTileId;
     public bool isVisited = false;
 
-    public bool CanMove => autoTileId != (int)TileTypes.Empty;
+    public bool CanMove => autoTileId != (int)TileTypes.Empty;  // 이동 가능한 타일은 Empty가 아닌 타일
+
+    public int Weight
+    {
+        get
+        {
+            if (autoTileId == (int)TileTypes.Empty)
+            {
+                return int.MaxValue;
+            }
+            if (autoTileId == (int)TileTypes.Grass)
+            {
+                return 1;
+            }
+            if (autoTileId == (int)TileTypes.Tree)
+            {
+                return 2;
+            }
+            if (autoTileId == (int)TileTypes.Hills)
+            {
+                return 4;
+            }
+            if (autoTileId == (int)TileTypes.Mountains)
+            {
+                return int.MaxValue;
+            }
+            if (autoTileId == (int)TileTypes.Towns || autoTileId == (int)TileTypes.Castle || autoTileId == (int)TileTypes.Monsters)
+            {
+                return 1;
+            }
+            return 1;
+        }
+    }
 
     public void UpdateAutoTileId()
     {
         autoTileId = 0;
         for (int i = 0; i < adjacents.Length; i++)
         {
-            if (adjacents[i] != null)
+            if (adjacents[i] != null && adjacents[i].autoTileId != (int)TileTypes.Empty)
             {
                 autoTileId |= (1 << i);
             }
@@ -56,7 +88,7 @@ public class Tile
             {
                 adjacents[i] = null;
                 UpdateAutoTileId();
-                UpdateFowTileId();
+                // UpdateFowTileId();
                 break;
             }
         }
@@ -64,17 +96,17 @@ public class Tile
 
     public void ClearAdjacents()
     {
+        // autoTileId = (int)TileTypes.Empty;
         for (int i = 0; i < adjacents.Length; i++)
         {
             if (adjacents[i] == null)
             {
                 continue;
             }
-
             adjacents[i].RemoveAdjacents(this);
             adjacents[i] = null;
+
+            // adjacents[i].UpdateFowTileId();
         }
-        UpdateAutoTileId();
-        UpdateFowTileId();
     }
 }
