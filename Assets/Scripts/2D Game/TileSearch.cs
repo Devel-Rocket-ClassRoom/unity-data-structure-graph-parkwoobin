@@ -35,6 +35,11 @@ public class TileSearch : MonoBehaviour
             return;
         }
 
+        if (player.isMoving)    // 이동 중 재클릭으로 경로 시작 타일이 꼬이는 문제를 방지
+        {
+            return;
+        }
+
         int targetTileId = stage.ScreenPosToTileId(Input.mousePosition);    // 클릭한 위치의 타일 ID 가져오기
         Tile targetTile = stage.Map.tiles[targetTileId];    // 클릭한 위치의 타일 가져오기
 
@@ -145,9 +150,10 @@ public class TileSearch : MonoBehaviour
         {
             player.MoveTo(path[i].id);
 
-            // 플레이어가 이동할 때까지 대기 (이동 시간 + 약간의 버퍼)
-            float duration = Vector3.Distance(stage.GetTilePos(path[i - 1].id), stage.GetTilePos(path[i].id)) / player.moveSpeed;
-            yield return new WaitForSeconds(duration + 0.05f);
+            while (player.isMoving)
+            {
+                yield return null;
+            }
         }
         Debug.Log(path.Count + "개 타일 이동 완료");
     }
